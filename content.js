@@ -34,7 +34,7 @@ function labelsFor(n) {
 
 let mode = 'normal'; // 'normal' | 'hint' | 'search'
 let pending = null, pendingTimer = 0;
-let hintUI = null, hints = [], hintInput = '';
+let hintUI = null, hints = [], hintInput = '', hintOpenInBackground = false;
 let searchUI = null, matches = [], matchIdx = 0;
 
 // --- shared overlay ---
@@ -150,7 +150,7 @@ function gotoMatch(delta) {
 
 // --- hints ---
 
-function showHints() {
+function showHints(openInBackground = false) {
   exitHints();
   const w = innerWidth, h = innerHeight;
   const els = [...document.querySelectorAll(HINT_SEL)].filter((el) => {
@@ -165,6 +165,7 @@ function showHints() {
 
   mode = 'hint';
   hintInput = '';
+  hintOpenInBackground = openInBackground;
   const labels = labelsFor(els.length);
   hintUI = makeOverlay();
   hintUI.root.innerHTML =
@@ -191,10 +192,27 @@ function exitHints() {
   hintUI = null;
   hints = [];
   hintInput = '';
+  hintOpenInBackground = false;
   if (mode === 'hint') mode = 'normal';
 }
 
-function activate(el) {
+function backgroundTabUrl(el) {
+  if (!el.href) return null;
+  try {
+    const url = new URL(el.href, location.href);
+    return /^https?:$/.test(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function activate(el, openInBackground) {
+  // A button or [role=link] div has no URL to hand off, so F activates it in place.
+  const url = openInBackground && backgroundTabUrl(el);
+  if (url) {
+    browser.runtime.sendMessage({ type: 'open-background-tab', url });
+    return;
+  }
   if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable) {
     el.focus();
   } else {
@@ -223,9 +241,9 @@ function onHintKey(e) {
     }
   }
   if (hit) {
-    const el = hit.el;
+    const el = hit.el, openInBackground = hintOpenInBackground;
     exitHints();
-    activate(el);
+    activate(el, openInBackground);
   } else if (!any) {
     exitHints();
   }
@@ -309,6 +327,7 @@ function onKey(e) {
     case 't': browser.runtime.sendMessage('newtab'); break;
     case '/': openSearch(); break;
     case 'f': showHints(); break;
+    case 'F': showHints(true); break;
     case 'n': gotoMatch(1); break;
     case 'N': gotoMatch(-1); break;
     case 'Escape': clearMatches(); return; // no preventDefault; Esc still stops page load

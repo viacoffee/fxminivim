@@ -18,11 +18,15 @@ search is built on the CSS Custom Highlight API.
 | `/` | Search bar — type, `Enter` to highlight |
 | `n` `N` | Next / previous match |
 | `f` | Show link hints; type the label to click |
+| `F` | Show link hints; opens an `http(s)` link in a background tab |
 | `Esc` | Clear search, dismiss hints, or blur a focused text field |
 
 Keys are ignored while you're typing in an input, textarea, or contenteditable,
 including one nested inside a shadow root. Any binding with Ctrl/Alt/Cmd held
 passes straight through to the page.
+
+`F` falls back to normal activation for elements without an `http(s)` URL, such
+as buttons and `[role=link]` divs.
 
 ## Why this exists
 
@@ -35,7 +39,7 @@ usual causes, all of which this one avoids by construction:
 - `all_frames: true` plus a message port per frame; ad iframes come and go and
   the ports accumulate. Here, top frame only.
 - A background page holding a `Map` keyed by tab id that isn't pruned on tab
-  close. There is a background script here, because `x`/`t` need `tabs.*`
+  close. There is a background script here, because `x`, `t`, and `F` need `tabs.*`
   and content scripts can't call it, but it's stateless: one message listener,
   no stored tab state, and the MV3 event page unloads when idle.
 
@@ -44,8 +48,8 @@ after your first search. Everything else lives and dies inside one keystroke.
 
 ## Deliberately missing
 
-Iframe support, opening links in a new tab (`F`), visual mode, marks, tab
-bindings, a custom keymap, an options page, incremental search-as-you-type.
+Iframe support, visual mode, marks, tab bindings, a custom keymap, an options
+page, incremental search-as-you-type.
 
 `h`/`l` scroll the page, not inner `overflow-x` containers, so they're inert on
 wide code blocks and tables.
@@ -61,9 +65,13 @@ than missing a hint.
 
 ## Install
 
-for development: `about:debugging` → *This Firefox* → *Load
-Temporary Add-on* → pick `manifest.json`. Hit *Reload* after every edit. It
-disappears when you restart Firefox.
+[Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/fxminivim/).
+
+## Development installation
+
+Open `about:debugging` → *This Firefox* → *Load Temporary Add-on* → pick
+`manifest.json`. Hit *Reload* after every edit. It disappears when you restart
+Firefox.
 
 ## Tests
 
