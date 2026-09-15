@@ -190,11 +190,12 @@ function showHints(openInBackground = false) {
   hintUI.root.innerHTML =
     '<style>.h{position:absolute;background:#ffe066;color:#000;' +
     'font:bold 11px/1.2 monospace;padding:1px 3px;border:1px solid #a80;' +
-    'border-radius:2px;text-transform:uppercase}</style>';
+    'border-radius:2px;text-transform:uppercase}.background{background:#8ecae6;' +
+    'border-color:#287da1}</style>';
   hints = els.map((el, i) => {
     const r = el.getBoundingClientRect();
     const tag = document.createElement('span');
-    tag.className = 'h';
+    tag.className = openInBackground ? 'h background' : 'h';
     tag.textContent = labels[i];
     tag.style.left = Math.max(0, r.left) + 'px';
     tag.style.top = Math.max(0, r.top) + 'px';
