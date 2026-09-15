@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "fxminivim",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Minimal vim keybindings: hjkl scrolling, gg/G, d/u paging, / search, f/F link hints.",
   "homepage_url": "https://github.com/viacoffee/fxminivim",
   "browser_specific_settings": {
