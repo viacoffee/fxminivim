@@ -120,6 +120,7 @@ function runSearch(q) {
   for (let n; (n = walker.nextNode()); ) {
     const hay = n.nodeValue.toLowerCase();
     for (let i = hay.indexOf(needle); i !== -1; i = hay.indexOf(needle, i + needle.length)) {
+      if (matches.length === MAX_MATCHES) break;
       const r = new Range();
       r.setStart(n, i);
       r.setEnd(n, i + needle.length);
