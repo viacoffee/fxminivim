@@ -302,8 +302,8 @@ function onKey(e) {
     if (e.key === 'g') {
       e.preventDefault();
       scrollTo({ top: 0, behavior: 'instant' });
+      return;
     }
-    return;
   }
 
   const half = innerHeight / 2;
