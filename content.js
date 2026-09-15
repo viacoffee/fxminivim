@@ -282,6 +282,7 @@ function onSearchKey(e) {
 }
 
 function onKey(e) {
+  if (!e.isTrusted) return;
   // Search first: our input wants Ctrl+A/C/V, and onSearchKey has to shield
   // them from the page too. It never preventDefaults them, so browser-level
   // combos (Ctrl+F, Ctrl+T) still work.
