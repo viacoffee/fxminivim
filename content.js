@@ -30,6 +30,24 @@ function labelsFor(n) {
   return out;
 }
 
+// Lowercasing can expand a character (for example, \u0130 becomes i\u0307). Keep the
+// original range boundaries for every lowered UTF-16 code unit.
+function lowerWithOffsets(text) {
+  let lower = '';
+  const starts = [], ends = [];
+  for (let i = 0; i < text.length; ) {
+    const char = String.fromCodePoint(text.codePointAt(i));
+    const folded = char.toLowerCase();
+    lower += folded;
+    for (let j = 0; j < folded.length; j++) {
+      starts.push(i);
+      ends.push(i + char.length);
+    }
+    i += char.length;
+  }
+  return { lower, starts, ends };
+}
+
 // --- state ---
 
 let mode = 'normal'; // 'normal' | 'hint' | 'search'
@@ -118,12 +136,12 @@ function runSearch(q) {
   // matches within a single text node only, so a phrase split
   // across <b>...</b> won't hit.
   for (let n; (n = walker.nextNode()); ) {
-    const hay = n.nodeValue.toLowerCase();
+    const { lower: hay, starts, ends } = lowerWithOffsets(n.nodeValue);
     for (let i = hay.indexOf(needle); i !== -1; i = hay.indexOf(needle, i + needle.length)) {
       if (matches.length === MAX_MATCHES) break;
       const r = new Range();
-      r.setStart(n, i);
-      r.setEnd(n, i + needle.length);
+      r.setStart(n, starts[i]);
+      r.setEnd(n, ends[i + needle.length - 1]);
       matches.push(r);
     }
     if (matches.length >= MAX_MATCHES) break;
@@ -341,4 +359,4 @@ function onKey(e) {
 if (typeof document !== 'undefined') {
   document.addEventListener('keydown', onKey, true);
 }
-if (typeof module !== 'undefined') module.exports = { labelsFor, HINT_CHARS };
+if (typeof module !== 'undefined') module.exports = { labelsFor, HINT_CHARS, lowerWithOffsets };
